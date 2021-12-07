@@ -118,10 +118,11 @@ proto-update-deps:
 init: kill-dev install 
 	@echo "Initializing both blockchains..."
 	./network/init.sh
-	./network/start.sh
-	@echo "Initializing relayer..." 
-	./network/hermes/hermes-restore-key.sh
-	./network/hermes/hermes.sh
+# Manually invoke the commented out cmds below as genesis.json should be edited to include "/cosmos.bank.v1beta1.MsgSend" pre-start
+# ./network/start.sh
+# @echo "Initializing relayer..." 
+# ./network/hermes/hermes-restore-key.sh
+# ./network/hermes/hermes.sh
 
 init-golang-rly: kill-dev install
 	@echo "Initializing both blockchains..."

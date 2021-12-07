@@ -377,7 +377,7 @@ func New(
 	ibcRouter.AddRoute(icacontrollertypes.SubModuleName, icaControllerIBCModule).
 		AddRoute(icahosttypes.SubModuleName, icaHostIBCModule).
 		AddRoute(ibctransfertypes.ModuleName, transferIBCModule).
-		AddRoute(intertxtypes.ModuleName, interTxIBCModule)
+		AddRoute(intertxtypes.ModuleName, icaControllerIBCModule) // ica with mock auth module stack route to ica (top level of middleware stack)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// Create evidence Keeper for to register the IBC light client misbehaviour evidence route
