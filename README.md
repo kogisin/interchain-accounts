@@ -35,10 +35,11 @@ make init
 # Open a seperate terminal
 
 # Store the following account addresses within the current shell env
-export DEMOWALLET_1=$(icad keys show DEMOWALLET_1 -a --keyring-backend test --home ./data/test-1)
-echo $DEMOWALLET_1
-export DEMOWALLET_2=$(icad keys show DEMOWALLET_2 -a --keyring-backend test --home ./data/test-2)
-echo $DEMOWALLET_2
+export DEMOWALLET_1=$(icad keys show demowallet1 -a --keyring-backend test --home ./data/test-1);
+echo $DEMOWALLET_1;
+
+export DEMOWALLET_2=$(icad keys show demowallet2 -a --keyring-backend test --home ./data/test-2);
+echo $DEMOWALLET_2;
 
 # Register an interchain account on behalf of DEMOWALLET_1 where chain test-2 is the interchain accounts host
 icad tx intertx register --from $DEMOWALLET_1 --connection-id connection-0 --counterparty-connection-id connection-0 --chain-id test-1 --gas 150000 --home ./data/test-1 --node tcp://localhost:16657 --keyring-backend test -y
@@ -51,7 +52,7 @@ make start-rly
 icad query intertx interchainaccounts $DEMOWALLET_1 connection-0 connection-0 --home ./data/test-1 --node tcp://localhost:16657
 
 # Store the interchain account address by parsing the query result
-export ICA_ADDR=$(icad query intertx interchainaccounts $DEMOWALLET_1 connection-0 connection-0 --home ./data/test-1 --node tcp://localhost:16657 -o json | jq -r '.interchain_account_address')
+export ICA_ADDR=$(icad query intertx interchainaccounts $DEMOWALLET_1 connection-0 connection-0 --home ./data/test-1 --node tcp://localhost:16657 -o json | jq -r '.interchain_account_address') && echo $ICA_ADDR
 
 # Check the interchain account's balance on test-2 chain. It should be empty.
 icad q bank balances $ICA_ADDR --chain-id test-2 --node tcp://localhost:26657
