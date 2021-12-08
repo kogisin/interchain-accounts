@@ -118,33 +118,10 @@ proto-update-deps:
 init: kill-dev install 
 	@echo "Initializing both blockchains..."
 	./network/init.sh
-# Manually invoke the commented out cmds below as genesis.json should be edited to include "/cosmos.bank.v1beta1.MsgSend" pre-start
-# Example ICA Genesis: data/test-2/config/genesis.json
-#
-# "interchainaccounts": {
-#   "controller_genesis_state": {
-#     "active_channels": [],
-#     "interchain_accounts": [],
-#     "ports": [],
-#     "params": {
-#       "controller_enabled": true
-#     }
-#   },
-#   "host_genesis_state": {
-#     "active_channels": [],
-#     "interchain_accounts": [],
-#     "port": "interchain-account",
-#     "params": {
-#       "host_enabled": true,
-#       "allow_messages": ["/cosmos.bank.v1beta1.MsgSend"]
-#     }
-#   }
-# },
-
-# ./network/start.sh
-# @echo "Initializing relayer..." 
-# ./network/hermes/hermes-restore-key.sh
-# ./network/hermes/hermes.sh
+	./network/start.sh
+	@echo "Initializing relayer..." 
+	./network/hermes/restore-keys.sh
+	./network/hermes/create-conn.sh
 
 init-golang-rly: kill-dev install
 	@echo "Initializing both blockchains..."
