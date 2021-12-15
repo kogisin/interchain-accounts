@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Configure predetermined settings
-# val1: cosmos1mjk79fjjgpplak5wq838w0yd982gzkyfrk07am
-# val2: cosmos17dtl0mjt3t77kpuhg2edqzjpszulwhgzuj9ljs
 BINARY=icad
 CHAIN_DIR=./data
 CHAINID_1=test-1
@@ -87,4 +84,4 @@ sed -i -e 's#"tcp://0.0.0.0:1317"#"tcp://0.0.0.0:'"$RESTPORT_2"'"#g' $CHAIN_DIR/
 sed -i -e 's#":8080"#":'"$ROSETTA_2"'"#g' $CHAIN_DIR/$CHAINID_2/config/app.toml
 
 # Update host chain genesis to allow x/bank/MsgSend ICA tx execution
-sed -i -e 's/\"allow_messages\":.*/\"allow_messages\": [\"\/cosmos.bank.v1beta1.MsgSend\"]/g' $CHAIN_DIR/$CHAINID_2/config/genesis.json
+sed -i -e 's/\"allow_messages\":.*/\"allow_messages\": [\"\/cosmos.bank.v1beta1.MsgSend\", \"\/cosmos.staking.v1beta1.MsgDelegate\"]/g' $CHAIN_DIR/$CHAINID_2/config/genesis.json
