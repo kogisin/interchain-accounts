@@ -18,7 +18,7 @@ type msgServer struct {
 	Keeper
 }
 
-// NewMsgServerImpl creates and returns a new types.MsgServer, fulfilling the intertx msg service interface
+// NewMsgServerImpl creates and returns a new types.MsgServer, fulfilling the intertx Msg service interface
 func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return &msgServer{Keeper: keeper}
 }
