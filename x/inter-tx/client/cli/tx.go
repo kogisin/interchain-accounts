@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/interchain-accounts/x/inter-tx/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -74,7 +75,7 @@ func getRegisterAccountCmd() *cobra.Command {
 
 func getSendTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "send [interchain_account_address] [to_address] [amount] --connection-id --counterparty-connection-id",
+		Use:  "send [interchain_account_address] --connection-id --counterparty-connection-id",
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -84,24 +85,20 @@ func getSendTxCmd() *cobra.Command {
 
 			ownerAddr := clientCtx.GetFromAddress()
 			interchainAccountAddr := args[0]
-			toAddress := args[1]
-			if err != nil {
-				return err
-			}
-
-			amount, err := sdk.ParseCoinsNormalized(args[2])
-			if err != nil {
-				return err
-			}
 
 			connectionId := viper.GetString(FlagConnectionId)
 			counterpartyConnectionId := viper.GetString(FlagCounterpartyConnectionId)
 
+			amount, err := sdk.ParseCoinsNormalized("1uatom,1uphoton")
+			if err != nil {
+				return err
+			}
+			interchainMsg := bank.NewMsgSend(ownerAddr, ownerAddr, amount)
+
 			msg := types.NewMsgSend(
 				interchainAccountAddr,
 				ownerAddr,
-				toAddress,
-				amount,
+				interchainMsg,
 				connectionId,
 				counterpartyConnectionId,
 			)

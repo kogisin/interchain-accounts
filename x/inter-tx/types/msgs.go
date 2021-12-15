@@ -62,13 +62,12 @@ var _ sdk.Msg = &MsgSend{}
 
 // NewMsgSend creates a new MsgSend instance
 func NewMsgSend(
-	interchainAccountAddr string, owner sdk.AccAddress, toAddress string, amount sdk.Coins, connectionId string, counterpartyConnectionId string,
+	interchainAccountAddr string, owner sdk.AccAddress, msg sdk.Msg, connectionId string, counterpartyConnectionId string,
 ) *MsgSend {
 	return &MsgSend{
 		InterchainAccount:        interchainAccountAddr,
 		Owner:                    owner,
-		ToAddress:                toAddress,
-		Amount:                   amount,
+		Msg:                      msg,
 		ConnectionId:             connectionId,
 		CounterpartyConnectionId: counterpartyConnectionId,
 	}
@@ -91,17 +90,21 @@ func (msg MsgSend) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic performs a basic check of the MsgRegisterAccount fields.
 func (msg MsgSend) ValidateBasic() error {
-	if strings.TrimSpace(msg.InterchainAccount) == "" {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing sender address")
+	if strings.TrimSpace(msg.Owner.String()) == "" {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing owner address")
 	}
 
-	if strings.TrimSpace(msg.ToAddress) == "" {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing recipient address")
-	}
+	// if strings.TrimSpace(msg.InterchainAccount) == "" {
+	// 	return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing sender address")
+	// }
 
-	if !msg.Amount.IsValid() {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, msg.Amount.String())
-	}
+	// if strings.TrimSpace(msg.ToAddress) == "" {
+	// 	return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing recipient address")
+	// }
+
+	// if !msg.Amount.IsValid() {
+	// 	return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, msg.Amount.String())
+	// }
 	return nil
 }
 

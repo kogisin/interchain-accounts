@@ -4,6 +4,7 @@ package intertx;
 option go_package = "github.com/cosmos/interchain-accounts/x/inter-tx/types";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/any.proto";
 
 // Msg defines the ica-authentication Msg service.
 service Msg {
@@ -34,11 +35,11 @@ message MsgSend {
 
   string   interchain_account              = 1 [(gogoproto.moretags) = "yaml:\"interchain_account\""];
   bytes    owner                           = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
-  string   to_address                      = 3 [(gogoproto.moretags) = "yaml:\"interchain_account\""];
-  repeated cosmos.base.v1beta1.Coin amount = 4
-      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
-  string connection_id              = 5 [(gogoproto.moretags) = "yaml:\"connection_id\""];
-  string counterparty_connection_id = 6 [(gogoproto.moretags) = "yaml:\"counterparty_connection_id\""];
+  // repeated cosmos.base.v1beta1.Msg msg = 3
+  //     [(gogoproto.nullable) = false, (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.Msg"];
+  google.protobuf.Any msg = 3 [(gogoproto.nullable) = false, (gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.Msg"];
+  string connection_id              = 4 [(gogoproto.moretags) = "yaml:\"connection_id\""];
+  string counterparty_connection_id = 5 [(gogoproto.moretags) = "yaml:\"counterparty_connection_id\""];
 }
 
 // MsgSendResponse defines the Msg/Send response type.
