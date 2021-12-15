@@ -24,7 +24,7 @@ func GetQueryCmd() *cobra.Command {
 
 func getInterchainAccountCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "interchainaccounts [account] [connectionID] [counterpartyConnectionID]",
+		Use:  "interchainaccounts [account] [connection-id] [counterparty-connection-id]",
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
