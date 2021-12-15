@@ -56,7 +56,7 @@ message MsgDelegate {
 
   string   interchain_account       = 1 [(gogoproto.moretags) = "yaml:\"interchain_account\""];
   bytes    owner                    = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
-  string   validator_address        = 3 [(gogoproto.moretags) = "yaml:\"interchain_account\""];
+  string   validator_address        = 3 [(gogoproto.moretags) = "yaml:\"validator_address\""];
   cosmos.base.v1beta1.Coin amount   = 4 [(gogoproto.nullable) = false];
   string connection_id              = 5 [(gogoproto.moretags) = "yaml:\"connection_id\""];
   string counterparty_connection_id = 6 [(gogoproto.moretags) = "yaml:\"counterparty_connection_id\""];
