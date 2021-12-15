@@ -1,7 +1,9 @@
 syntax = "proto3";
+
 package intertx;
 
 option go_package = "github.com/cosmos/interchain-accounts/x/inter-tx/types";
+
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
@@ -11,6 +13,8 @@ service Msg {
   rpc RegisterAccount(MsgRegisterAccount) returns (MsgRegisterAccountResponse);
   // Send defines a rpc handler for MsgSend
   rpc Send(MsgSend) returns (MsgSendResponse);
+  // Delegate to host a chain validator using an interchain account
+  rpc Delegate(MsgDelegate) returns (MsgDelegateResponse);
 }
 
 // MsgRegisterAccount registers an interchain account for the given owner over the specified connection pair
@@ -43,3 +47,20 @@ message MsgSend {
 
 // MsgSendResponse defines the Msg/Send response type.
 message MsgSendResponse {}
+
+// MsgDelegate builds and sends a stakingtypes.MsgDelegate to the interchian account associated with the provided owner and connection pair
+// The interchain account on the associated host chain will execute the stakingtypes.MsgDelegate
+message MsgDelegate {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string   interchain_account       = 1 [(gogoproto.moretags) = "yaml:\"interchain_account\""];
+  bytes    owner                    = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string   validator_address        = 3 [(gogoproto.moretags) = "yaml:\"interchain_account\""];
+  cosmos.base.v1beta1.Coin amount   = 4 [(gogoproto.nullable) = false];
+  string connection_id              = 5 [(gogoproto.moretags) = "yaml:\"connection_id\""];
+  string counterparty_connection_id = 6 [(gogoproto.moretags) = "yaml:\"counterparty_connection_id\""];
+}
+
+// MsgDelegateResponse defines the Msg/Delegate response type
+message MsgDelegateResponse {}

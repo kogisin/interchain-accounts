@@ -13,12 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	flagPacketTimeoutHeight    = "packet-timeout-height"
-	flagPacketTimeoutTimestamp = "packet-timeout-timestamp"
-	flagAbsoluteTimeouts       = "absolute-timeouts"
-)
-
+// GetTxCmd creates and returns the intertx tx command
 func GetTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,
@@ -28,10 +23,10 @@ func GetTxCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	// this line is used by starport scaffolding # 1
 	cmd.AddCommand(
 		getRegisterAccountCmd(),
 		getSendTxCmd(),
+		getDelegateTxCmd(),
 	)
 
 	return cmd
@@ -39,20 +34,17 @@ func GetTxCmd() *cobra.Command {
 
 func getRegisterAccountCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use: "register --connection-id --counterparty-connection-id",
+		Use: "register",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			connectionId := viper.GetString(FlagConnectionId)
-			counterpartyConnectionId := viper.GetString(FlagCounterpartyConnectionId)
-
 			msg := types.NewMsgRegisterAccount(
 				clientCtx.GetFromAddress().String(),
-				connectionId,
-				counterpartyConnectionId,
+				viper.GetString(FlagConnectionID),
+				viper.GetString(FlagCounterpartyConnectionID),
 			)
 
 			if err := msg.ValidateBasic(); err != nil {
@@ -63,9 +55,9 @@ func getRegisterAccountCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().AddFlagSet(fsConnectionId)
-	_ = cmd.MarkFlagRequired(FlagConnectionId)
-	_ = cmd.MarkFlagRequired(FlagCounterpartyConnectionId)
+	cmd.Flags().AddFlagSet(fsConnectionPair)
+	_ = cmd.MarkFlagRequired(FlagConnectionID)
+	_ = cmd.MarkFlagRequired(FlagCounterpartyConnectionID)
 
 	flags.AddTxFlagsToCmd(cmd)
 
@@ -74,17 +66,10 @@ func getRegisterAccountCmd() *cobra.Command {
 
 func getSendTxCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "send [interchain_account_address] [to_address] [amount] --connection-id --counterparty-connection-id",
+		Use:  "send [interchain_account_address] [to_address] [amount]",
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			ownerAddr := clientCtx.GetFromAddress()
-			interchainAccountAddr := args[0]
-			toAddress := args[1]
 			if err != nil {
 				return err
 			}
@@ -94,16 +79,13 @@ func getSendTxCmd() *cobra.Command {
 				return err
 			}
 
-			connectionId := viper.GetString(FlagConnectionId)
-			counterpartyConnectionId := viper.GetString(FlagCounterpartyConnectionId)
-
 			msg := types.NewMsgSend(
-				interchainAccountAddr,
-				ownerAddr,
-				toAddress,
+				clientCtx.GetFromAddress(),
 				amount,
-				connectionId,
-				counterpartyConnectionId,
+				args[0],
+				args[1],
+				viper.GetString(FlagConnectionID),
+				viper.GetString(FlagCounterpartyConnectionID),
 			)
 
 			if err := msg.ValidateBasic(); err != nil {
@@ -114,11 +96,54 @@ func getSendTxCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().AddFlagSet(fsConnectionId)
+	cmd.Flags().AddFlagSet(fsConnectionPair)
 
-	_ = cmd.MarkFlagRequired(FlagConnectionId)
-	_ = cmd.MarkFlagRequired(FlagCounterpartyConnectionId)
+	_ = cmd.MarkFlagRequired(FlagConnectionID)
+	_ = cmd.MarkFlagRequired(FlagCounterpartyConnectionID)
 
 	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func getDelegateTxCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:  "delegate [interchain_account_address] [val_address] [amount]",
+		Args: cobra.ExactArgs(3),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			amount, err := sdk.ParseCoinNormalized(args[2])
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgDelegate(
+				clientCtx.GetFromAddress(),
+				amount,
+				args[0],
+				args[1],
+				viper.GetString(FlagConnectionID),
+				viper.GetString(FlagCounterpartyConnectionID),
+			)
+
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	cmd.Flags().AddFlagSet(fsConnectionPair)
+
+	_ = cmd.MarkFlagRequired(FlagConnectionID)
+	_ = cmd.MarkFlagRequired(FlagCounterpartyConnectionID)
+
+	flags.AddTxFlagsToCmd(cmd)
+
 	return cmd
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// GetQueryCmd creates and returns the intertx query command
 func GetQueryCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,
@@ -16,15 +17,14 @@ func GetQueryCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	cmd.AddCommand(getIBCAccountCmd())
+	cmd.AddCommand(getInterchainAccountCmd())
 
 	return cmd
 }
 
-// getIBCAccountCmd builds a cobra command to query for an interchain account registered on this chain
-func getIBCAccountCmd() *cobra.Command {
+func getInterchainAccountCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "interchainaccounts [account] [connectionId] [counterpartyConnectionId]",
+		Use:  "interchainaccounts [account] [connectionID] [counterpartyConnectionID]",
 		Args: cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -32,16 +32,8 @@ func getIBCAccountCmd() *cobra.Command {
 				return err
 			}
 
-			owner := args[0]
-			connectionId := args[1]
-			counterpartyConnectionId := args[2]
-
 			queryClient := types.NewQueryClient(clientCtx)
-
-			res, err := queryClient.InterchainAccountFromAddress(
-				cmd.Context(),
-				&types.QueryInterchainAccountFromAddressRequest{Owner: owner, ConnectionId: connectionId, CounterpartyConnectionId: counterpartyConnectionId},
-			)
+			res, err := queryClient.InterchainAccountFromAddress(cmd.Context(), types.NewQueryInterchainAccountRequest(args[0], args[1], args[2]))
 			if err != nil {
 				return err
 			}
@@ -51,5 +43,6 @@ func getIBCAccountCmd() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
+
 	return cmd
 }

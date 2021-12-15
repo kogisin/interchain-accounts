@@ -7,36 +7,61 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-const (
-	TypeMsgRegisterAccount = "register"
-	TypeMsgSend            = "send"
+var (
+	_ sdk.Msg = &MsgDelegate{}
+	_ sdk.Msg = &MsgRegisterAccount{}
+	_ sdk.Msg = &MsgSend{}
 )
 
-var _ sdk.Msg = &MsgRegisterAccount{}
-
-// NewMsgRegisterAccount creates a new MsgRegisterAccount instance
-func NewMsgRegisterAccount(
-	owner,
-	connectionId string,
-	counterpartyConnectionId string,
-) *MsgRegisterAccount {
-	return &MsgRegisterAccount{
+// NewMsgDelegate creates a new MsgDelegate instance
+func NewMsgDelegate(owner sdk.AccAddress, amt sdk.Coin, interchainAccAddr, validatorAddr, connectionID, counterpartyConnectionID string) *MsgDelegate {
+	return &MsgDelegate{
+		InterchainAccount:        interchainAccAddr,
 		Owner:                    owner,
-		ConnectionId:             connectionId,
-		CounterpartyConnectionId: counterpartyConnectionId,
+		ValidatorAddress:         validatorAddr,
+		Amount:                   amt,
+		ConnectionId:             connectionID,
+		CounterpartyConnectionId: counterpartyConnectionID,
 	}
 }
 
-// Route implements sdk.Msg
-func (MsgRegisterAccount) Route() string {
-	return RouterKey
+// GetSigners implements sdk.Msg
+func (msg MsgDelegate) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
 }
 
-// Type implements sdk.Msg
-func (MsgRegisterAccount) Type() string {
-	return TypeMsgRegisterAccount
+// ValidateBasic implements sdk.Msg
+func (msg MsgDelegate) ValidateBasic() error {
+	if strings.TrimSpace(msg.InterchainAccount) == "" {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing sender address")
+	}
+
+	if strings.TrimSpace(msg.ValidatorAddress) == "" {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing validator address")
+	}
+
+	if !msg.Amount.IsValid() {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, msg.Amount.String())
+	}
+
+	_, err := sdk.ValAddressFromBech32(msg.ValidatorAddress)
+	if err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid bech32 validator address: %s", msg.ValidatorAddress)
+	}
+
+	return nil
 }
 
+// NewMsgRegisterAccount creates a new MsgRegisterAccount instance
+func NewMsgRegisterAccount(owner, connectionID, counterpartyConnectionID string) *MsgRegisterAccount {
+	return &MsgRegisterAccount{
+		Owner:                    owner,
+		ConnectionId:             connectionID,
+		CounterpartyConnectionId: counterpartyConnectionID,
+	}
+}
+
+// ValidateBasic implements sdk.Msg
 func (msg MsgRegisterAccount) ValidateBasic() error {
 	if strings.TrimSpace(msg.Owner) == "" {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing sender address")
@@ -45,43 +70,26 @@ func (msg MsgRegisterAccount) ValidateBasic() error {
 	return nil
 }
 
-func (msg MsgRegisterAccount) GetSignBytes() []byte {
-	panic("IBC messages do not support amino")
-}
-
 // GetSigners implements sdk.Msg
 func (msg MsgRegisterAccount) GetSigners() []sdk.AccAddress {
 	accAddr, err := sdk.AccAddressFromBech32(msg.Owner)
 	if err != nil {
 		panic(err)
 	}
+
 	return []sdk.AccAddress{accAddr}
 }
 
-var _ sdk.Msg = &MsgSend{}
-
 // NewMsgSend creates a new MsgSend instance
-func NewMsgSend(
-	interchainAccountAddr string, owner sdk.AccAddress, toAddress string, amount sdk.Coins, connectionId string, counterpartyConnectionId string,
-) *MsgSend {
+func NewMsgSend(owner sdk.AccAddress, amt sdk.Coins, interchainAccAddr, toAddr, connectionID, counterpartyConnectionID string) *MsgSend {
 	return &MsgSend{
-		InterchainAccount:        interchainAccountAddr,
+		InterchainAccount:        interchainAccAddr,
 		Owner:                    owner,
-		ToAddress:                toAddress,
-		Amount:                   amount,
-		ConnectionId:             connectionId,
-		CounterpartyConnectionId: counterpartyConnectionId,
+		ToAddress:                toAddr,
+		Amount:                   amt,
+		ConnectionId:             connectionID,
+		CounterpartyConnectionId: counterpartyConnectionID,
 	}
-}
-
-// Route implements sdk.Msg
-func (MsgSend) Route() string {
-	return RouterKey
-}
-
-// Type implements sdk.Msg
-func (MsgSend) Type() string {
-	return TypeMsgSend
 }
 
 // GetSigners implements sdk.Msg
@@ -89,7 +97,7 @@ func (msg MsgSend) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Owner}
 }
 
-// ValidateBasic performs a basic check of the MsgRegisterAccount fields.
+// ValidateBasic implements sdk.Msg
 func (msg MsgSend) ValidateBasic() error {
 	if strings.TrimSpace(msg.InterchainAccount) == "" {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing sender address")
@@ -102,9 +110,6 @@ func (msg MsgSend) ValidateBasic() error {
 	if !msg.Amount.IsValid() {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, msg.Amount.String())
 	}
-	return nil
-}
 
-func (msg MsgSend) GetSignBytes() []byte {
-	panic("IBC messages do not support amino")
+	return nil
 }

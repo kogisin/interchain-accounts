@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package intertx;
 
 option go_package = "github.com/cosmos/interchain-accounts/x/inter-tx/types";
@@ -8,8 +9,7 @@ import "gogoproto/gogo.proto";
 // Query defines the gRPC querier service.
 service Query {
   // QueryInterchainAccountFromAddress returns the interchain account for given owner address on a given connection pair
-  rpc InterchainAccountFromAddress(QueryInterchainAccountFromAddressRequest)
-      returns (QueryInterchainAccountFromAddressResponse);
+  rpc InterchainAccountFromAddress(QueryInterchainAccountFromAddressRequest) returns (QueryInterchainAccountFromAddressResponse);
 }
 
 // QueryInterchainAccountFromAddressRequest is the request type for the Query/InterchainAccountAddress RPC

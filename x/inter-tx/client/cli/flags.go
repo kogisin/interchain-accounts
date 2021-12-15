@@ -5,16 +5,18 @@ import (
 )
 
 const (
-	FlagConnectionId             = "connection-id"
-	FlagCounterpartyConnectionId = "counterparty-connection-id"
+	// The connection end identifier on the controller chain
+	FlagConnectionID = "connection-id"
+	// The connection end identifier on the host chain
+	FlagCounterpartyConnectionID = "counterparty-connection-id"
 )
 
 // common flagsets to add to various functions
 var (
-	fsConnectionId = flag.NewFlagSet("", flag.ContinueOnError)
+	fsConnectionPair = flag.NewFlagSet("", flag.ContinueOnError)
 )
 
 func init() {
-	fsConnectionId.String(FlagConnectionId, "", "Connection ID")
-	fsConnectionId.String(FlagCounterpartyConnectionId, "", "Counterparty Connection ID")
+	fsConnectionPair.String(FlagConnectionID, "", "Connection ID")
+	fsConnectionPair.String(FlagCounterpartyConnectionID, "", "Counterparty Connection ID")
 }
