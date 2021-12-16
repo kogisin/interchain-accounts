@@ -1,16 +1,22 @@
 package types
 
 import (
+	fmt "fmt"
 	"strings"
 
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	proto "github.com/gogo/protobuf/proto"
 )
 
 var (
 	_ sdk.Msg = &MsgDelegate{}
 	_ sdk.Msg = &MsgRegisterAccount{}
 	_ sdk.Msg = &MsgSend{}
+	_ sdk.Msg = &MsgSubmitTx{}
+
+	_ codectypes.UnpackInterfacesMessage = MsgSubmitTx{}
 )
 
 // NewMsgDelegate creates a new MsgDelegate instance
@@ -109,6 +115,70 @@ func (msg MsgSend) ValidateBasic() error {
 
 	if !msg.Amount.IsValid() {
 		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, msg.Amount.String())
+	}
+
+	return nil
+}
+
+// NewMsgSend creates a new MsgSend instance
+func NewMsgSubmitTx(owner sdk.AccAddress, sdkMsg sdk.Msg, interchainAccAddr, connectionID, counterpartyConnectionID string) (*MsgSubmitTx, error) {
+	any, err := PackTxMsgAny(sdkMsg)
+	if err != nil {
+		return nil, err
+	}
+
+	return &MsgSubmitTx{
+		InterchainAccount:        interchainAccAddr,
+		Owner:                    owner,
+		ConnectionId:             connectionID,
+		CounterpartyConnectionId: counterpartyConnectionID,
+		Msg:                      any,
+	}, nil
+}
+
+// PackTxMsgAny marshals the sdk.Msg payload to a protobuf Any type
+func PackTxMsgAny(sdkMsg sdk.Msg) (*codectypes.Any, error) {
+	msg, ok := sdkMsg.(proto.Message)
+	if !ok {
+		return nil, fmt.Errorf("can't proto marshal %T", sdkMsg)
+	}
+
+	any, err := codectypes.NewAnyWithValue(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return any, nil
+}
+
+// UnpackInterfaces implements codectypes.UnpackInterfacesMessage
+func (msg MsgSubmitTx) UnpackInterfaces(unpacker codectypes.AnyUnpacker) error {
+	var (
+		sdkMsg sdk.Msg
+	)
+
+	return unpacker.UnpackAny(msg.Msg, &sdkMsg)
+}
+
+// GetTxMsg fetches the cached any message
+func (msg *MsgSubmitTx) GetTxMsg() sdk.Msg {
+	sdkMsg, ok := msg.Msg.GetCachedValue().(sdk.Msg)
+	if !ok {
+		return nil
+	}
+
+	return sdkMsg
+}
+
+// GetSigners implements sdk.Msg
+func (msg MsgSubmitTx) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Owner}
+}
+
+// ValidateBasic implements sdk.Msg
+func (msg MsgSubmitTx) ValidateBasic() error {
+	if strings.TrimSpace(msg.InterchainAccount) == "" {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing sender address")
 	}
 
 	return nil

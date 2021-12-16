@@ -92,3 +92,40 @@ func (k msgServer) Delegate(goCtx context.Context, msg *types.MsgDelegate) (*typ
 
 	return &types.MsgDelegateResponse{}, nil
 }
+
+// SubmitTx implements the Msg/SubmitTx interface
+func (k msgServer) SubmitTx(goCtx context.Context, msg *types.MsgSubmitTx) (*types.MsgSubmitTxResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	portID, err := icatypes.GeneratePortID(msg.Owner.String(), msg.ConnectionId, msg.CounterpartyConnectionId)
+	if err != nil {
+		return nil, err
+	}
+
+	channelID, found := k.icaControllerKeeper.GetActiveChannelID(ctx, portID)
+	if !found {
+		return nil, sdkerrors.Wrapf(icatypes.ErrActiveChannelNotFound, "failed to retrieve active channel for port %s", portID)
+	}
+
+	chanCap, found := k.scopedKeeper.GetCapability(ctx, host.ChannelCapabilityPath(portID, channelID))
+	if !found {
+		return nil, sdkerrors.Wrap(channeltypes.ErrChannelCapabilityNotFound, "module does not own channel capability")
+	}
+
+	data, err := icatypes.SerializeCosmosTx(k.cdc, []sdk.Msg{msg.GetTxMsg()})
+	if err != nil {
+		return nil, err
+	}
+
+	packetData := icatypes.InterchainAccountPacketData{
+		Type: icatypes.EXECUTE_TX,
+		Data: data,
+	}
+
+	_, err = k.icaControllerKeeper.TrySendTx(ctx, chanCap, portID, packetData)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.MsgSubmitTxResponse{}, nil
+}
