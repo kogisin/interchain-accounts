@@ -6,13 +6,11 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gogo/protobuf/proto"
 	"github.com/pkg/errors"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/interchain-accounts/x/inter-tx/types"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -179,18 +177,6 @@ func getSubmitTxCmd() *cobra.Command {
 					return errors.Wrap(err, "error unmarshalling sdk msg file")
 				}
 			}
-
-			cmd.Printf("sdk msg: %v\n\n", txMsg)
-
-			protoMsg, ok := txMsg.(proto.Message)
-			cmd.Printf("as proto msg: %v\n\n", protoMsg)
-			cmd.Printf("as proto msg: %v\n\n", ok)
-
-			delegateMsg, ok := txMsg.(*stakingtypes.MsgDelegate)
-			cmd.Printf("as staking delegate msg: %v\n\n", delegateMsg)
-			cmd.Printf("as staking delegate msg: %v\n\n", ok)
-
-			cmd.Printf("sdk msg: %v\n\n", txMsg)
 
 			msg, err := types.NewMsgSubmitTx(clientCtx.GetFromAddress(), txMsg, args[0], viper.GetString(FlagConnectionID), viper.GetString(FlagCounterpartyConnectionID))
 			if err != nil {
