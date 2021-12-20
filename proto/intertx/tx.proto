@@ -34,6 +34,7 @@ message MsgRegisterAccount {
 // MsgRegisterAccountResponse is the response type for Msg/RegisterAccount
 message MsgRegisterAccountResponse {}
 
+// TODO: remove interchain_account since it can be queried directly from the controller keeper
 // MsgSend builds and then sends a banktypes.MsgSend to the interchain account associated with the given owner on the
 // given connection pair. The interchain account on the host chain will execute the banktypes.MsgSend
 message MsgSend {
@@ -52,6 +53,7 @@ message MsgSend {
 // MsgSendResponse defines the Msg/Send response type.
 message MsgSendResponse {}
 
+// TODO: remove interchain_account since it can be queried directly from the controller keeper
 // MsgDelegate builds and sends a stakingtypes.MsgDelegate to the interchian account associated with the provided owner and connection pair
 // The interchain account on the associated host chain will execute the stakingtypes.MsgDelegate
 message MsgDelegate {
@@ -74,11 +76,10 @@ message MsgSubmitTx {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
-  string interchain_account         = 1 [(gogoproto.moretags) = "yaml:\"interchain_account\""];
-  bytes owner                       = 2 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
-  string connection_id              = 3 [(gogoproto.moretags) = "yaml:\"connection_id\""];
-  string counterparty_connection_id = 4 [(gogoproto.moretags) = "yaml:\"counterparty_connection_id\""];
-  google.protobuf.Any msg           = 5;
+  bytes owner                       = 1 [(gogoproto.casttype) = "github.com/cosmos/cosmos-sdk/types.AccAddress"];
+  string connection_id              = 2 [(gogoproto.moretags) = "yaml:\"connection_id\""];
+  string counterparty_connection_id = 3 [(gogoproto.moretags) = "yaml:\"counterparty_connection_id\""];
+  google.protobuf.Any msg           = 4;
 }
 
 // MsgSubmitTxResponse defines the MsgSubmitTx response type

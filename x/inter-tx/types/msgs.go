@@ -121,14 +121,13 @@ func (msg MsgSend) ValidateBasic() error {
 }
 
 // NewMsgSend creates a new MsgSend instance
-func NewMsgSubmitTx(owner sdk.AccAddress, sdkMsg sdk.Msg, interchainAccAddr, connectionID, counterpartyConnectionID string) (*MsgSubmitTx, error) {
+func NewMsgSubmitTx(owner sdk.AccAddress, sdkMsg sdk.Msg, connectionID, counterpartyConnectionID string) (*MsgSubmitTx, error) {
 	any, err := PackTxMsgAny(sdkMsg)
 	if err != nil {
 		return nil, err
 	}
 
 	return &MsgSubmitTx{
-		InterchainAccount:        interchainAccAddr,
 		Owner:                    owner,
 		ConnectionId:             connectionID,
 		CounterpartyConnectionId: counterpartyConnectionID,
@@ -177,8 +176,17 @@ func (msg MsgSubmitTx) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic implements sdk.Msg
 func (msg MsgSubmitTx) ValidateBasic() error {
-	if strings.TrimSpace(msg.InterchainAccount) == "" {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "missing sender address")
+
+	if len(msg.Msg.GetValue()) == 0 {
+		return fmt.Errorf("can't execute an empty msg")
+	}
+
+	if msg.ConnectionId == "" {
+		return fmt.Errorf("can't execute an empty ConnectionId")
+	}
+
+	if msg.CounterpartyConnectionId == "" {
+		return fmt.Errorf("can't execute an empty CounterpartyConnectionId")
 	}
 
 	return nil

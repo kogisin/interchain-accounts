@@ -28,11 +28,11 @@ make install
 # In the variables.sh file inside /network/hermes/ replace the $HERMES_BINARY variable with a path to the hermes binary generated from the build step below. 
 # You can find this in the /target/debug/ directory inside ibc-rs. 
 
-git clone https://github.com/informalsystems/ibc-rs
-git checkout adi/ibcgo_v2
-cd relayer-cli
+git clone https://github.com/seantking/hermes-temp-ica
+cd ibc-rs/relayer-cli
 cargo build
 
+# The binary should be built inside of ibc-rs/target/debug. You should move it to somewhere accessible by your path, like /usr/local/bin or ~/.cargo/bin
 
 # Bootstrap two local chains & create a connection using the hermes relayer
 make init
@@ -71,7 +71,16 @@ icad tx bank send $DEMOWALLET_2 $ICA_ADDR 10000stake --chain-id test-2 --home ./
 # Check that the balance has been updated
 icad q bank balances $ICA_ADDR --chain-id test-2 --node tcp://localhost:26657
 
-# Test sending assets from interchain account via ibc.
+# Test sending assets from interchain account via generic message
+# First generate the transaction and pipe the message array into a file called send-raw.json
+# We're generating a normal bank send msg on the host chain below.
+icad tx bank send $ICA_ADDR $DEMOWALLET_2 5000stake --from $ICA_ADDR --chain-id test-2 --gas 90000 --home ./data/test-2 --node tcp://localhost:26657 --keyring-backend test --generate-only | jq '.body.messages[0]' > ./data/send-raw.json
+
+# Use the contents of send-raw as a parameter for the submit-tx command. This command could alternatively accept any valid msg to be executed on the host chain
+# Note, the messages have to be approved on the host chain as parameters for the host module in genesis (or via governance). we did this during init.sh for delegate and send.
+icad tx intertx submit-tx ./data/send-raw.json --connection-id connection-0 --counterparty-connection-id connection-0 --from $DEMOWALLET_1 --chain-id test-1 --gas 150000 --home ./data/test-1 --node tcp://localhost:16657 --keyring-backend test -y
+
+# Alternatively try sending assets from the interchain account via the intertx send command.
 icad tx intertx send $ICA_ADDR $DEMOWALLET_2 5000stake --connection-id connection-0 --counterparty-connection-id connection-0 --chain-id test-1 --gas 90000 --home ./data/test-1 --node tcp://localhost:16657 --from $DEMOWALLET_1 --keyring-backend test -y
 
 # Wait until the relayer has relayed the packet
@@ -82,8 +91,8 @@ icad q bank balances $ICA_ADDR --chain-id test-2 --node tcp://localhost:26657
 # Fetch the host chain validator operator address
 export VAL_ADDR=$(cat ./data/test-2/config/genesis.json | jq -r '.app_state.genutil.gen_txs[0].body.messages[0].validator_address') && echo $VAL_ADDR
 
-# Perform a staking delegation using the interchain account with the remaining the funds via ibc
-icad tx intertx delegate $ICA_ADDR $VAL_ADDR 5000stake --connection-id connection-0 --counterparty-connection-id connection-0 --from $DEMOWALLET_1 --chain-id test-1 --home ./data test-1 --node tcp://localhost:16657 --keyring-backend test -y
+# Perform a staking delegation using the interchain account with the remaining funds via ibc
+icad tx intertx delegate $ICA_ADDR $VAL_ADDR 5000stake --connection-id connection-0 --counterparty-connection-id connection-0 --from $DEMOWALLET_1 --chain-id test-1 --home ./data/test-1 --node tcp://localhost:16657 --keyring-backend test -y
 
 # Inspect the staking delegations
 icad q staking delegations-to $VAL_ADDR --home ./data/test-2 --node tcp://localhost:26657
