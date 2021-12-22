@@ -29,7 +29,7 @@ make install
 # You can find this in the /target/debug/ directory inside ibc-rs. 
 
 git clone https://github.com/seantking/hermes-temp-ica
-cd ibc-rs/relayer-cli
+cd hermes-temp-ica/relayer-cli
 cargo build
 
 # The binary should be built inside of ibc-rs/target/debug. You should move it to somewhere accessible by your path, like /usr/local/bin or ~/.cargo/bin
