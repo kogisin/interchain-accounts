@@ -2,15 +2,19 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/gov/client/cli"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+
 	"github.com/cosmos/interchain-accounts/x/inter-tx/types"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 // GetTxCmd creates and returns the intertx tx command
@@ -144,6 +148,54 @@ func getDelegateTxCmd() *cobra.Command {
 	_ = cmd.MarkFlagRequired(FlagCounterpartyConnectionID)
 
 	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+func GetCmdSubmitRegisterInterchainAccountProposal() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "register-ica",
+		Args:  cobra.ExactArgs(0),
+		Short: "Submit a public farming plan",
+		Long:  strings.TrimSpace("Submit a governance proposal to register interchain account"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			depositStr, err := cmd.Flags().GetString(cli.FlagDeposit)
+			if err != nil {
+				return err
+			}
+
+			deposit, err := sdk.ParseCoinsNormalized(depositStr)
+			if err != nil {
+				return err
+			}
+
+			content := types.NewRegisterInterchainAccountProposal(
+				"Register Interchain Account",
+				"Demo",
+				"",
+				"",
+				"",
+			)
+
+			from := clientCtx.GetFromAddress()
+
+			msg, err := govtypes.NewMsgSubmitProposal(content, deposit, from)
+			if err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	cmd.Flags().String(cli.FlagDeposit, "", "deposit of proposal")
 
 	return cmd
 }
