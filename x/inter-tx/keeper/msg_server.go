@@ -27,7 +27,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 func (k msgServer) RegisterAccount(goCtx context.Context, msg *types.MsgRegisterAccount) (*types.MsgRegisterAccountResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	acc, err := sdk.AccAddressFromBech32(msg.Owner)
+	acc, err := sdk.AccAddressFromBech32(types.InterchainAccountController)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,13 @@ func (k msgServer) RegisterAccount(goCtx context.Context, msg *types.MsgRegister
 // Send implements the Msg/Send interface
 func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSendResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	err := k.TrySendCoins(ctx, msg.Owner, msg.InterchainAccount, msg.ToAddress, msg.Amount, msg.ConnectionId, msg.CounterpartyConnectionId)
+
+	acc, err := sdk.AccAddressFromBech32(types.InterchainAccountController)
+	if err != nil {
+		return nil, err
+	}
+
+	err = k.TrySendCoins(ctx, acc, msg.InterchainAccount, msg.ToAddress, msg.Amount, msg.ConnectionId, msg.CounterpartyConnectionId)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +60,7 @@ func (k msgServer) Send(goCtx context.Context, msg *types.MsgSend) (*types.MsgSe
 func (k msgServer) Delegate(goCtx context.Context, msg *types.MsgDelegate) (*types.MsgDelegateResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	portID, err := icatypes.GeneratePortID(msg.Owner.String(), msg.ConnectionId, msg.CounterpartyConnectionId)
+	portID, err := icatypes.GeneratePortID(types.InterchainAccountController, msg.ConnectionId, msg.CounterpartyConnectionId)
 	if err != nil {
 		return nil, err
 	}

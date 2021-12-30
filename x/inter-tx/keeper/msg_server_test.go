@@ -1,6 +1,9 @@
 package keeper_test
 
 import (
+	"fmt"
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	icatypes "github.com/cosmos/ibc-go/v3/modules/apps/27-interchain-accounts/types"
 	ibctesting "github.com/cosmos/ibc-go/v3/testing"
@@ -77,4 +80,11 @@ func (suite *KeeperTestSuite) TestRegisterInterchainAccount() {
 
 		})
 	}
+}
+
+func TestCont(t *testing.T) {
+	acc, err := sdk.AccAddressFromBech32(types.InterchainAccountController)
+
+	fmt.Println("err: ", err)
+	fmt.Println("acc: ", acc.String())
 }
