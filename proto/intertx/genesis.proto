@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package intertx;
+
+import "intertx/intertx.proto";
+
+option go_package = "github.com/cosmos/interchain-accounts/x/inter-tx/types";
+
+import "gogoproto/gogo.proto";
+
+// GenesisState defines the intertx module's genesis state.
+message GenesisState {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // params defines all the parameters for the module
+  Params params = 1 [ (gogoproto.nullable) = false ];
+}
