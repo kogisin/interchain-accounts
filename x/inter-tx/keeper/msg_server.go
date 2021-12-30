@@ -32,7 +32,7 @@ func (k msgServer) RegisterAccount(goCtx context.Context, msg *types.MsgRegister
 		return nil, err
 	}
 
-	if err := k.RegisterInterchainAccount(ctx, acc, msg.ConnectionId, msg.CounterpartyConnectionId); err != nil {
+	if err := k.RegisterInterchainAccount(ctx, msg.ConnectionId, msg.CounterpartyConnectionId, acc); err != nil {
 		return nil, err
 	}
 

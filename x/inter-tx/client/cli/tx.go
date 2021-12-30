@@ -181,7 +181,6 @@ func GetCmdSubmitRegisterInterchainAccountProposal() *cobra.Command {
 				"Demo",
 				"",
 				"",
-				"",
 			)
 
 			from := clientCtx.GetFromAddress()

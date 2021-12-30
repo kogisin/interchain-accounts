@@ -22,14 +22,12 @@ func init() {
 func NewRegisterInterchainAccountProposal(
 	title string,
 	description string,
-	owner string,
 	connectionId string,
 	counterpartyConnectionId string,
 ) *RegisterInterchainAccountProposal {
 	return &RegisterInterchainAccountProposal{
 		Title:                    title,
 		Description:              description,
-		Owner:                    owner,
 		ConnectionId:             connectionId,
 		CounterpartyConnectionId: counterpartyConnectionId,
 	}
@@ -54,8 +52,7 @@ func (p RegisterInterchainAccountProposal) String() string {
 	return fmt.Sprintf(`Register Interchain Account Proposal:
   Title:              		%s
   Description:        		%s
-  Owner:         	  		%s
   ConnectionId: 	  		%s
   CounterpartyConnectionId: %s
-`, p.Title, p.Description, p.Owner, p.ConnectionId, p.CounterpartyConnectionId)
+`, p.Title, p.Description, p.ConnectionId, p.CounterpartyConnectionId)
 }

@@ -14,7 +14,7 @@ func HandleRegisterInterchainAccountProposal(ctx sdk.Context, k Keeper, proposal
 		return err
 	}
 
-	if err := k.RegisterInterchainAccount(ctx, acc, proposal.ConnectionId, proposal.CounterpartyConnectionId); err != nil {
+	if err := k.RegisterInterchainAccount(ctx, proposal.ConnectionId, proposal.CounterpartyConnectionId, acc); err != nil {
 		return err
 	}
 
