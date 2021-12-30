@@ -72,6 +72,10 @@ sed -i -e 's/enable = false/enable = true/g' $CHAIN_DIR/$CHAINID_1/config/app.to
 sed -i -e 's/swagger = false/swagger = true/g' $CHAIN_DIR/$CHAINID_1/config/app.toml
 sed -i -e 's#"tcp://0.0.0.0:1317"#"tcp://0.0.0.0:'"$RESTPORT_1"'"#g' $CHAIN_DIR/$CHAINID_1/config/app.toml
 sed -i -e 's#":8080"#":'"$ROSETTA_1"'"#g' $CHAIN_DIR/$CHAINID_1/config/app.toml
+sed -i -e 's%"amount": "10000000"%"amount": "1"%g' $CHAIN_DIR/$CHAINID_1/config/genesis.json
+sed -i -e 's%"quorum": "0.334000000000000000",%"quorum": "0.000000000000000001",%g' $CHAIN_DIR/$CHAINID_1/config/genesis.json
+sed -i -e 's%"threshold": "0.500000000000000000",%"threshold": "0.000000000000000001",%g' $CHAIN_DIR/$CHAINID_1/config/genesis.json
+sed -i -e 's%"voting_period": "172800s"%"voting_period": "30s"%g' $CHAIN_DIR/$CHAINID_1/config/genesis.json
 
 sed -i -e 's#"tcp://0.0.0.0:26656"#"tcp://0.0.0.0:'"$P2PPORT_2"'"#g' $CHAIN_DIR/$CHAINID_2/config/config.toml
 sed -i -e 's#"tcp://127.0.0.1:26657"#"tcp://0.0.0.0:'"$RPCPORT_2"'"#g' $CHAIN_DIR/$CHAINID_2/config/config.toml
@@ -82,6 +86,10 @@ sed -i -e 's/enable = false/enable = true/g' $CHAIN_DIR/$CHAINID_2/config/app.to
 sed -i -e 's/swagger = false/swagger = true/g' $CHAIN_DIR/$CHAINID_2/config/app.toml
 sed -i -e 's#"tcp://0.0.0.0:1317"#"tcp://0.0.0.0:'"$RESTPORT_2"'"#g' $CHAIN_DIR/$CHAINID_2/config/app.toml
 sed -i -e 's#":8080"#":'"$ROSETTA_2"'"#g' $CHAIN_DIR/$CHAINID_2/config/app.toml
+sed -i -e 's%"amount": "10000000"%"amount": "1"%g' $CHAIN_DIR/$CHAINID_2/config/genesis.json
+sed -i -e 's%"quorum": "0.334000000000000000",%"quorum": "0.000000000000000001",%g' $CHAIN_DIR/$CHAINID_2/config/genesis.json
+sed -i -e 's%"threshold": "0.500000000000000000",%"threshold": "0.000000000000000001",%g' $CHAIN_DIR/$CHAINID_2/config/genesis.json
+sed -i -e 's%"voting_period": "172800s"%"voting_period": "30s"%g' $CHAIN_DIR/$CHAINID_2/config/genesis.json
 
 # Update host chain genesis to allow x/bank/MsgSend ICA tx execution
 sed -i -e 's/\"allow_messages\":.*/\"allow_messages\": [\"\/cosmos.bank.v1beta1.MsgSend\", \"\/cosmos.staking.v1beta1.MsgDelegate\"]/g' $CHAIN_DIR/$CHAINID_2/config/genesis.json
